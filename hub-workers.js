@@ -21,6 +21,9 @@ export default {
           'Accept-Encoding': getReqHeader("Accept-Encoding"),
           'Connection': 'keep-alive',
           'Cache-Control': 'max-age=0'
+        },
+        cf: {
+          cacheTtlByStatus: { "200-299": 120, "404": 10, "500-599": 3 }
         }
       };
       let token_url = auth_url + url.pathname + url.search
