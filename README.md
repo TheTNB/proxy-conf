@@ -8,4 +8,4 @@
 
 ## License
 
-(WTFPL)[http://www.wtfpl.net/]
+[WTFPL](http://www.wtfpl.net/)
