@@ -1,50 +1,55 @@
-const hub_host = 'registry-1.docker.io'
-const auth_url = 'https://auth.docker.io'
-const workers_url = 'https://hub.rat.dev'
+const hub_host = "registry-1.docker.io";
+const auth_url = "https://auth.docker.io";
+const workers_url = "https://hub.rat.dev";
+const banned_list = [];
 
 export default {
   async fetch(request) {
     const url = new URL(request.url);
     const getReqHeader = (key) => request.headers.get(key);
 
-    if (url.pathname === '/') {
+    if (url.pathname === "/") {
       return index();
     }
 
-    if (url.pathname === '/token') {
+    if (banned_list.some((word) => url.pathname.includes(word))) {
+      return new Response("this image is not allowed", { status: 403 });
+    }
+
+    if (url.pathname === "/token") {
       let token_parameter = {
         headers: {
-          'Host': 'auth.docker.io',
-          'User-Agent': getReqHeader("User-Agent"),
-          'Accept': getReqHeader("Accept"),
-          'Accept-Language': getReqHeader("Accept-Language"),
-          'Accept-Encoding': getReqHeader("Accept-Encoding"),
-          'Connection': 'keep-alive',
-          'Cache-Control': 'max-age=0'
+          Host: "auth.docker.io",
+          "User-Agent": getReqHeader("User-Agent"),
+          Accept: getReqHeader("Accept"),
+          "Accept-Language": getReqHeader("Accept-Language"),
+          "Accept-Encoding": getReqHeader("Accept-Encoding"),
+          Connection: "keep-alive",
+          "Cache-Control": "max-age=0",
         },
         cf: {
-          cacheTtlByStatus: { "200-299": 120, "404": 10, "500-599": 3 }
-        }
+          cacheTtlByStatus: { "200-299": 120, 404: 10, "500-599": 3 },
+        },
       };
-      let token_url = auth_url + url.pathname + url.search
-      return fetch(new Request(token_url, request), token_parameter)
+      let token_url = auth_url + url.pathname + url.search;
+      return fetch(new Request(token_url, request), token_parameter);
     }
 
     url.hostname = hub_host;
 
     let parameter = {
       headers: {
-        'Host': hub_host,
-        'User-Agent': getReqHeader("User-Agent"),
-        'Accept': getReqHeader("Accept"),
-        'Accept-Language': getReqHeader("Accept-Language"),
-        'Accept-Encoding': getReqHeader("Accept-Encoding"),
-        'Connection': 'keep-alive',
-        'Cache-Control': 'max-age=0'
+        Host: hub_host,
+        "User-Agent": getReqHeader("User-Agent"),
+        Accept: getReqHeader("Accept"),
+        "Accept-Language": getReqHeader("Accept-Language"),
+        "Accept-Encoding": getReqHeader("Accept-Encoding"),
+        Connection: "keep-alive",
+        "Cache-Control": "max-age=0",
       },
-      redirect: 'follow',
+      redirect: "follow",
       cf: {
-        cacheTtlByStatus: { "200-299": 2592000, "404": 10, "500-599": 3 }
+        cacheTtlByStatus: { "200-299": 2592000, 404: 10, "500-599": 3 },
       },
     };
 
@@ -52,13 +57,16 @@ export default {
       parameter.headers.Authorization = getReqHeader("Authorization");
     }
 
-    let res = await fetch(new Request(url, request), parameter)
-    res = new Response(res.body, res)
+    let res = await fetch(new Request(url, request), parameter);
+    res = new Response(res.body, res);
 
     if (res.headers.has("Www-Authenticate")) {
       let auth = res.headers.get("Www-Authenticate");
-      let re = new RegExp(auth_url, 'g');
-      res.headers.set("Www-Authenticate", res.headers.get("Www-Authenticate").replace(re, workers_url));
+      let re = new RegExp(auth_url, "g");
+      res.headers.set(
+        "Www-Authenticate",
+        res.headers.get("Www-Authenticate").replace(re, workers_url)
+      );
     }
 
     return res;
@@ -123,6 +131,9 @@ async function index() {
           <a target="_blank" href="https://github.com/TheTNB/panel">耗子面板</a>
           强力驱动
         </p>
+        <p><b>本站开启 UA 白名单，如果您的客户端无法拉取镜像可向我们反馈</b></p>
+        <p><b>同时本站有一定速率限制，如需大量请求建议您 <a target="_blank" href="https://github.com/TheTNB/proxy-conf">自建代理</a> 使用</b></p>
+        <p>交流反馈群：<a target="_blank" href="https://jq.qq.com/?_wv=1027&k=I1oJKSTH">12370907</a></p>
         <p id="cf"></p>
       </div>
       <script>
@@ -164,6 +175,15 @@ async function index() {
       </script>
     </body>
 </html>`,
-    { headers: { "Content-Type": "text/html" } }
+    {
+      headers: {
+        "Content-Type": "text/html",
+        "Cache-Control": "public, max-age=2592000",
+      },
+      cf: {
+        cacheTtl: 2592000,
+        cacheEverything: true,
+      },
+    }
   );
 }
