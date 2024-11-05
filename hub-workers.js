@@ -8,7 +8,7 @@ export default {
     const url = new URL(request.url);
     const getReqHeader = (key) => request.headers.get(key);
 
-    if (url.pathname === "/") {
+    if (url.pathname === '/') {
       return index();
     }
 
@@ -16,36 +16,36 @@ export default {
       return new Response("this image is not allowed", { status: 403 });
     }
 
-    if (url.pathname === "/token") {
+    if (url.pathname === '/token') {
       let token_parameter = {
         headers: {
-          Host: "auth.docker.io",
-          "User-Agent": getReqHeader("User-Agent"),
-          Accept: getReqHeader("Accept"),
-          "Accept-Language": getReqHeader("Accept-Language"),
-          "Accept-Encoding": getReqHeader("Accept-Encoding"),
-          Connection: "keep-alive",
-          "Cache-Control": "max-age=0",
+          'Host': 'auth.docker.io',
+          'User-Agent': getReqHeader("User-Agent"),
+          'Accept': getReqHeader("Accept"),
+          'Accept-Language': getReqHeader("Accept-Language"),
+          'Accept-Encoding': getReqHeader("Accept-Encoding"),
+          'Connection': 'keep-alive',
+          'Cache-Control': 'max-age=0'
         },
         cf: {
-          cacheTtlByStatus: { "200-299": 120, 404: 10, "500-599": 3 },
-        },
+          cacheTtlByStatus: { "200-299": 120, "404": 10, "500-599": 3 }
+        }
       };
-      let token_url = auth_url + url.pathname + url.search;
-      return fetch(new Request(token_url, request), token_parameter);
+      let token_url = auth_url + url.pathname + url.search
+      return fetch(new Request(token_url, request), token_parameter)
     }
 
     url.hostname = hub_host;
 
     let parameter = {
       headers: {
-        Host: hub_host,
-        "User-Agent": getReqHeader("User-Agent"),
-        Accept: getReqHeader("Accept"),
-        "Accept-Language": getReqHeader("Accept-Language"),
-        "Accept-Encoding": getReqHeader("Accept-Encoding"),
-        Connection: "keep-alive",
-        "Cache-Control": "max-age=0",
+        'Host': hub_host,
+        'User-Agent': getReqHeader("User-Agent"),
+        'Accept': getReqHeader("Accept"),
+        'Accept-Language': getReqHeader("Accept-Language"),
+        'Accept-Encoding': getReqHeader("Accept-Encoding"),
+        'Connection': 'keep-alive',
+        'Cache-Control': 'max-age=0'
       },
       redirect: "follow",
       cf: {
